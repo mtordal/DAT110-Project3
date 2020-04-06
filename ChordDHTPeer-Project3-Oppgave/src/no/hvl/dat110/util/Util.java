@@ -6,7 +6,6 @@ package no.hvl.dat110.util;
  * @author tdoy
  */
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -47,7 +46,7 @@ public class Util {
 		BigInteger modulo = Hash.addressSize();
 
 		if (lower.compareTo(upper) > 0) {
-			if (id.compareTo(new BigInteger("0")) >= 0 && id.compareTo(upper) <= 0) {
+			if (id.compareTo(upper) <= 0) {
 				id = id.add(modulo);
 			}
 

@@ -57,16 +57,16 @@ public class FileManager {
 		// implement
 		
 		// set a loop where size = numReplicas
-		for (int i = 0; i < numReplicas; i++) {
+		for (int i = 0; i < this.numReplicas; i++) {
 
 			// replicate by adding the index to filename
-			String replica = filename + i;
+			String replica = this.filename + i;
 
 			// hash the replica
 			hash = Hash.hashOf(replica);
 
 			// store the hash in the replicafiles array.
-			replicafiles[i] = hash;
+			this.replicafiles[i] = hash;
 		}
 
 	}
@@ -76,24 +76,30 @@ public class FileManager {
      */
     public int distributeReplicastoPeers() throws RemoteException {
     	int counter = 0;
-    	
+
     	// Task1: Given a filename, make replicas and distribute them to all active peers such that: pred < replica <= peer
-    	
+
     	// Task2: assign a replica as the primary for this file. Hint, see the slide (project 3) on Canvas
-    	
+
     	// create replicas of the filename
-    	
+		createReplicaFiles();
+
 		// iterate over the replicas
-    	
-    	// for each replica, find its successor by performing findSuccessor(replica)
-    	
-    	// call the addKey on the successor and add the replica
-    	
-    	// call the saveFileContent() on the successor
-    	
-    	// increment counter
-    	
-    		
+    	for (int i = 0; i < this.numReplicas; i++) {
+			// for each replica, find its successor by performing findSuccessor(replica)
+    		BigInteger replica = this.replicafiles[i];
+    		NodeInterface succ = chordnode.findSuccessor(replica);
+
+			// call the addKey on the successor and add the replica
+    		succ.addKey(replica);
+
+			// call the saveFileContent() on the successor
+    		succ.saveFileContent(this.filename, replica, this.bytesOfFile, true);
+
+			// increment counter
+    		counter++;
+		}
+
 		return counter;
     }
 	
@@ -110,15 +116,21 @@ public class FileManager {
 		// Task: Given a filename, find all the peers that hold a copy of this file
 		
 		// generate the N replicas from the filename by calling createReplicaFiles()
+		createReplicaFiles();
 		
 		// it means, iterate over the replicas of the file
-		
-		// for each replica, do findSuccessor(replica) that returns successor s.
-		
-		// get the metadata (Message) of the replica from the successor, s (i.e. active peer) of the file
-		
-		// save the metadata in the set succinfo.
-		
+		for (int i = 0; i < this.numReplicas; i++) {
+			// for each replica, do findSuccessor(replica) that returns successor s.
+			BigInteger replica = this.replicafiles[i];
+			NodeInterface succ = this.chordnode.findSuccessor(replica);
+
+			// get the metadata (Message) of the replica from the successor, s (i.e. active peer) of the file
+			Message msg = succ.getFilesMetadata(replica);
+
+			// save the metadata in the set succinfo.
+			succinfo.add(msg);
+		}
+
 		this.activeNodesforFile = succinfo;
 		
 		return succinfo;
