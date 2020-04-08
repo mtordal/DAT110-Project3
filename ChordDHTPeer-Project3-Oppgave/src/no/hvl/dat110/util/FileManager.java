@@ -76,6 +76,8 @@ public class FileManager {
      */
     public int distributeReplicastoPeers() throws RemoteException {
     	int counter = 0;
+    	Random random = new Random();
+    	int index = random.nextInt(this.numReplicas - 1);
 
     	// Task1: Given a filename, make replicas and distribute them to all active peers such that: pred < replica <= peer
 
@@ -94,7 +96,11 @@ public class FileManager {
     		succ.addKey(replica);
 
 			// call the saveFileContent() on the successor
-    		succ.saveFileContent(this.filename, replica, this.bytesOfFile, true);
+			if (counter == index) {
+				succ.saveFileContent(this.filename, replica, this.bytesOfFile, true);
+			} else {
+				succ.saveFileContent(this.filename, replica, this.bytesOfFile, false);
+			}
 
 			// increment counter
     		counter++;
@@ -110,7 +116,6 @@ public class FileManager {
 	 * @throws RemoteException 
 	 */
 	public Set<Message> requestActiveNodesForFile(String filename) throws RemoteException {
-		
 		this.filename = filename;
 		Set<Message> succinfo = new HashSet<Message>();
 		// Task: Given a filename, find all the peers that hold a copy of this file
@@ -141,18 +146,19 @@ public class FileManager {
 	 * @return 
 	 */
 	public NodeInterface findPrimaryOfItem() {
-
 		// Task: Given all the active peers of a file (activeNodesforFile()), find which is holding the primary copy
 		
 		// iterate over the activeNodesforFile
-		
-		// for each active peer (saved as Message)
-		
-		// use the primaryServer boolean variable contained in the Message class to check if it is the primary or not
-		
-		// return the primary
-		
-		return null; 
+		for(Message msg : activeNodesforFile) {
+			// for each active peer (saved as Message)
+			// use the primaryServer boolean variable contained in the Message class to check if it is the primary or not
+			if(msg.isPrimaryServer()) {
+				// return the primary
+				return Util.getProcessStub(msg.getNodeIP(), msg.getPort());
+			}
+		}
+
+		return null;
 	}
 	
     /**
